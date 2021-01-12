@@ -11,7 +11,7 @@ end
 require 'bundler/setup'
 begin
   require 'pry-byebug'
-rescue StandardError
+rescue LoadError
   nil
 end
 
