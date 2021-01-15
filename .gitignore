@@ -4,3 +4,4 @@ Gemfile.lock
 .rspec
 bin
 coverage/
+*gem
