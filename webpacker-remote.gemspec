@@ -23,6 +23,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency('webpacker', ENV.fetch('WEBPACKER_GEM_VERSION', '~> 5.2'))
 
   spec.add_development_dependency('rspec', '~> 3.0')
-  spec.add_development_dependency('rspec-expectations', '~> 3.0')
   spec.add_development_dependency('simplecov', '~> 0.19')
 end
