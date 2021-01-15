@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'spec_helper'
+
 RSpec.describe Webpacker::Remote do
   let(:uri) { 'https://example.com' }
   subject { described_class.new(uri: uri) }
