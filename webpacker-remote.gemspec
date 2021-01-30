@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |spec|
   spec.name          = 'webpacker-remote'
-  spec.version       = '0.1.0'
+  spec.version       = '0.2.0'
   spec.authors       = ['Vlad Bokov']
   spec.email         = ['vlad@lunatic.cat']
   spec.license       = 'MIT'
