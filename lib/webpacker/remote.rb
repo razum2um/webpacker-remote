@@ -18,12 +18,17 @@ class Webpacker::Remote < Webpacker::Instance
 
   # fetch early, fail fast
   # rubocop:disable Lint/MissingSuper
-  def initialize(uri:, root_path: nil, config_path: nil) # rubocop:disable Lint/UnusedMethodArgument
+  def initialize(root_path: nil, config_path: nil)
+    uri = File.join(root_path.to_s, config_path.to_s)
     @public_manifest_content = JSON.parse(self.class.get_http_response(uri))
     # deliberately not calling `super` just emulating what's done there
-    @root_path = @config_path = Pathname.new('/non-existing-path-for-ctor-compatibility')
+    @config_path = config_path
+    @root_path = root_path
   rescue StandardError => e
-    raise Error, "#{e.class}: #{e.message}"
+    raise Error, <<~MSG
+      having {root_path: #{root_path.inspect}, config_path: #{config_path.inspect}}
+      #{e.class}: #{e.message}
+    MSG
   end
   # rubocop:enable Lint/MissingSuper
 
