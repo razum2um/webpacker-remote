@@ -13,13 +13,14 @@
 - in `config/initializers/remote_webpacker.rb`
 
 ```rb
-REMOTE_WEBPACKER = Webpacker::Remote.new(uri: 'https://../manifest.json')
+REMOTE_WEBPACKER = Webpacker::Remote.new(root_path: 'https://asset_host/build/', config_path: 'manifest.json')
 ```
 
 - in `app/views/layouts/application.html.erb` (**not** `javascript_pack_tag`)
 
 ```rb
 <%= javascript_packs_with_chunks_tag 'main', webpacker: REMOTE_WEBPACKER %>
+#=> <script src='https://asset_host/build/static/js/main.2e302672.chunk.js'>
 ```
 
 Of course, you can use as many build as you like and do blue-green deployments using gems like `rollout`
