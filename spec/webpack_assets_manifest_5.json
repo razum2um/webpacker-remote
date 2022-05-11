@@ -29,5 +29,6 @@
       }
     }
   },
-  "main.js": "static/js/main.2e302672.chunk.js"
+  "main.js": "static/js/main.2e302672.chunk.js",
+  "RANDOM_RELEASE_TAG_KEY": "RANDOM_RELEASE_TAG_VALUE"
 }

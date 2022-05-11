@@ -28,5 +28,11 @@ Style/OpenStructUse:
 Gemspec/RequiredRubyVersion:
   Enabled: false
 
+Style/MutableConstant:
+  Enabled: false
+
+Style/HashSyntax:
+  EnforcedShorthandSyntax: never
+
 Style/ClassAndModuleChildren:
   EnforcedStyle: compact
