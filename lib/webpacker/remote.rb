@@ -14,21 +14,18 @@ class Webpacker::Remote < Webpacker::Instance
 
   class Error < StandardError; end
 
-  attr_reader :public_manifest_content
-
-  # fetch early, fail fast
   # rubocop:disable Lint/MissingSuper
-  def initialize(root_path: nil, config_path: nil)
-    uri = File.join(root_path.to_s, config_path.to_s)
-    @public_manifest_content = JSON.parse(self.class.get_http_response(uri))
+  def initialize(root_path: nil, config_path: nil, **config_content)
     # deliberately not calling `super` just emulating what's done there
+    # otherwise defaults in super initialize would call `Rails`
+    # let's unbind the gem from rails
     @config_path = config_path
     @root_path = root_path
-  rescue StandardError => e
-    raise Error, <<~MSG
-      having {root_path: #{root_path.inspect}, config_path: #{config_path.inspect}}
-      #{e.class}: #{e.message}
-    MSG
+
+    # additions
+    @config_content = config_content.symbolize_keys
+    # fetch manifest eagerly to fail fast in initiazer unless cache_manifest: false
+    manifest.manifest_data if @config_content.fetch(:cache_manifest, true)
   end
   # rubocop:enable Lint/MissingSuper
 
@@ -40,7 +37,7 @@ class Webpacker::Remote < Webpacker::Instance
     @config ||= Webpacker::Remote::Configuration.new(
       root_path: root_path,
       config_path: config_path,
-      env: env
+      **config_content
     )
   end
 
@@ -49,7 +46,9 @@ class Webpacker::Remote < Webpacker::Instance
     'production'
   end
 
-  def self.get_http_response(uri)
-    Net::HTTP.get_response(URI.parse(uri)).body
+  private
+
+  def config_content
+    { env: env }.merge(@config_content)
   end
 end
