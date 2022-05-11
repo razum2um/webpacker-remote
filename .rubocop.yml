@@ -16,5 +16,17 @@ Metrics/BlockLength:
 Style/Documentation:
   Enabled: false
 
+Style/FetchEnvVar:
+  Enabled: false
+
+Gemspec/RequireMFA:
+  Enabled: false
+
+Style/OpenStructUse:
+  Enabled: false
+
+Gemspec/RequiredRubyVersion:
+  Enabled: false
+
 Style/ClassAndModuleChildren:
   EnforcedStyle: compact

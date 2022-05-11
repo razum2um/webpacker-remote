@@ -5,11 +5,12 @@ require 'spec_helper'
 RSpec.describe Webpacker::Remote do
   let(:root_path) { 'https://example.com' }
   subject { described_class.new(root_path: root_path) }
+  let(:manifest) { '../manifest.json' }
 
-  describe 'with valid manifest' do
+  shared_examples 'a valid manifest' do
     before do
       allow(Net::HTTP).to receive(:get_response).with(URI.parse(root_path)) do
-        OpenStruct.new(body: File.read(File.expand_path('../manifest.json', __dir__)))
+        OpenStruct.new(body: File.read(File.expand_path(manifest, __dir__)))
       end
     end
 
@@ -26,6 +27,15 @@ RSpec.describe Webpacker::Remote do
         ]
       end
     end
+  end
+
+  describe 'with manifest v3' do
+    it_behaves_like 'a valid manifest'
+  end
+
+  describe 'with manifest v5' do
+    let(:manifest) { '../webpack_assets_manifest_5.json' }
+    it_behaves_like 'a valid manifest'
   end
 
   describe 'with invalid manifest' do
