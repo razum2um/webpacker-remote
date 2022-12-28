@@ -22,6 +22,7 @@ require 'webpacker/remote'
 if ENV['WEBPACKER_GEM_VERSION'] =~ /shakapacker/
   # by default `shakapacker` is tight to rails too much :'(
   require 'active_support/core_ext/object/inclusion'
+  require 'active_support/core_ext/string/output_safety' # SafeBuffer, String#html_safe
   module Rails
     module_function
 
@@ -56,5 +57,11 @@ RSpec.configure do |config|
       # def initialize(root_path: Rails.root, config_path: Rails.root.join("config/webpacker.yml"))
       Webpacker.instance = ::Webpacker::Instance.new(config_path: Pathname.new(tmp_webpacker_yml.path))
     end
+  end
+end
+
+RSpec::Matchers.define :eq_joined do |expected|
+  match do |actual|
+    values_match? Array(actual).join, Array(expected).join
   end
 end
