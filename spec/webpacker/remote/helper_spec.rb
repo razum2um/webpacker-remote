@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require 'active_support/core_ext/string/output_safety' # SafeBuffer
 
 MAIN_JAVASCRIPT_PACK_TAG = [
   "<script src='#{ROOT_PATH}/static/js/main.2e302672.chunk.js'>"
@@ -39,8 +40,11 @@ RSpec.describe Webpacker::Remote::Helper do
     end
   end
 
+  # railsy deps of lib/webpacker/helper.rb in shakapacker
   let(:klass) do
     Class.new do
+      attr_accessor :output_buffer
+
       include Webpacker::Helper
 
       # active_support/core_ext/array/extract_options.rb
@@ -55,22 +59,52 @@ RSpec.describe Webpacker::Remote::Helper do
       # emulate railsy interface
       def javascript_include_tag(*sources)
         extract_options!(sources)
-        sources.map { |src| "<script src='#{src}'>" }
+        sources.map { |src| "<script src='#{src}'>".html_safe }
       end
 
       # emulate railsy interface
       def stylesheet_link_tag(*sources)
         extract_options!(sources)
-        sources.map { |src| "<link href='#{src}'>" }
+        sources.map { |src| "<link href='#{src}'>".html_safe }
+      end
+
+      # emulate railsy action_view interface
+      # lib/action_view/helpers/capture_helper.rb
+      def capture(*args)
+        value = nil
+        buffer = with_output_buffer { value = yield(*args) }
+        return unless (string = buffer.presence || value) && string.is_a?(String)
+
+        ERB::Util.html_escape string
+      end
+
+      # emulate railsy action_view interface
+      # lib/action_view/helpers/text_helper.rb
+      def concat(string)
+        Array(string).each { |s| output_buffer << s }
+        output_buffer
+      end
+
+      # emulate railsy action_view interface, using a String instead of `ActionView::OutputBuffer``
+      # only enough to be used `capture` and `concat`
+      # see lib/action_view/buffers.rb
+      def with_output_buffer(buf = nil) # :nodoc:
+        buf ||= ActiveSupport::SafeBuffer.new
+        self.output_buffer = buf
+        old_buffer = output_buffer
+        yield
+        output_buffer
+      ensure
+        self.output_buffer = old_buffer
       end
     end
   end
 
-  subject { klass.new }
+  subject { klass.new.tap { |instance| instance.output_buffer = ActiveSupport::SafeBuffer.new } }
 
   describe '#javascript_pack_tag' do
     it 'respects additional :webpacker parameter' do
-      expect(subject.javascript_pack_tag('main', type: :javascript, webpacker: webpacker)).to eq(
+      expect(subject.javascript_pack_tag('main', type: :javascript, webpacker: webpacker)).to eq_joined(
         JAVASCRIPT_PACK_TAG
       )
     end
@@ -81,7 +115,7 @@ RSpec.describe Webpacker::Remote::Helper do
       pending "cannot be used if WEBPACKER_GEM_VERSION=#{webpacker_version.inspect}"
     else
       it 'respects additional :webpacker parameter' do
-        expect(subject.javascript_packs_with_chunks_tag('main', type: :javascript, webpacker: webpacker)).to eq(
+        expect(subject.javascript_packs_with_chunks_tag('main', type: :javascript, webpacker: webpacker)).to eq_joined(
           ALL_JAVASCRIPT_CHUNCKS_TAG
         )
       end
@@ -90,7 +124,7 @@ RSpec.describe Webpacker::Remote::Helper do
 
   describe '#stylesheet_pack_tag' do
     it 'respects additional :webpacker parameter' do
-      expect(subject.stylesheet_pack_tag('main', type: :stylesheet, webpacker: webpacker)).to eq(
+      expect(subject.stylesheet_pack_tag('main', type: :stylesheet, webpacker: webpacker)).to eq_joined(
         STYLESHEETS_PACK_TAG
       )
     end
@@ -101,7 +135,7 @@ RSpec.describe Webpacker::Remote::Helper do
       pending "cannot be used if WEBPACKER_GEM_VERSION=#{webpacker_version.inspect}"
     else
       it 'respects additional :webpacker parameter' do
-        expect(subject.stylesheet_packs_with_chunks_tag('main', type: :stylesheet, webpacker: webpacker)).to eq(
+        expect(subject.stylesheet_packs_with_chunks_tag('main', type: :stylesheet, webpacker: webpacker)).to eq_joined(
           ALL_STYLESHEETS_CHUNCKS_TAG
         )
       end
@@ -114,7 +148,7 @@ RSpec.describe Webpacker::Remote::Helper do
     it 'returns nil silently to get rails ability to pick up using asset-pipeline' do
       expect do
         subject.javascript_pack_tag('main', type: :javascript, webpacker: webpacker)
-      end.to raise_error(Webpacker::Manifest::MissingEntryError, /Webpacker can't find main.* in https:..example.com../)
+      end.to raise_error(Webpacker::Manifest::MissingEntryError, /(Webpacker|Shakapacker) can't find main.* in https:..example.com../)
     end
   end
 end

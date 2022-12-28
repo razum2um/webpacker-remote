@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |spec|
   spec.name          = 'webpacker-remote'
-  spec.version       = '0.3.0'
+  spec.version       = '0.3.1'
   spec.authors       = ['Vlad Bokov']
   spec.email         = ['vlad@lunatic.cat']
   spec.license       = 'MIT'
@@ -25,6 +25,7 @@ Gem::Specification.new do |spec|
     Specify correct one by yourself
   )
   spec.add_development_dependency(*ENV.fetch('WEBPACKER_GEM_VERSION', 'shakapacker|~> 6.2').split('|'))
+  spec.add_development_dependency('activesupport', '>= 4.2.0')
   spec.add_development_dependency('rspec', '~> 3.0')
   spec.add_development_dependency('simplecov', '~> 0.19')
 end

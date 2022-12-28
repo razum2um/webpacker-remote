@@ -2,7 +2,7 @@
 
 ![](https://github.com/lunatic-cat/webpacker-remote/workflows/ci/badge.svg)
 [![Gem Version](https://badge.fury.io/rb/webpacker-remote.svg)](https://badge.fury.io/rb/webpacker-remote)
-[![codecov](https://codecov.io/gh/lunatic-cat/webpacker-remote/branch/master/graph/badge.svg?token=X5K67X3V0Z)](undefined)
+[![codecov](https://codecov.io/gh/lunatic-cat/webpacker-remote/branch/master/graph/badge.svg?token=X5K67X3V0Z)](https://app.codecov.io/gh/lunatic-cat/webpacker-remote)
 
 - support for `create-react-app` developed in a separate repo
 - support for multiple external frontend builds, right now `webpacker` is [a singleton](https://github.com/rails/webpacker/blob/6ba995aed2b609a27e4e35ec28b2a7f688cce0cf/lib/webpacker/helper.rb#L5L7)
