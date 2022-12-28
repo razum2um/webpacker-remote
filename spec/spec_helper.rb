@@ -22,7 +22,6 @@ require 'webpacker/remote'
 if ENV['WEBPACKER_GEM_VERSION'] =~ /shakapacker/
   # by default `shakapacker` is tight to rails too much :'(
   require 'active_support/core_ext/object/inclusion'
-  require 'active_support/core_ext/string/output_safety' # SafeBuffer, String#html_safe
   module Rails
     module_function
 
@@ -51,11 +50,11 @@ RSpec.configure do |config|
     config.before do
       # shakapacker unavoidably reads the config :'(
       tmp_webpacker_yml = Tempfile.new
-      tmp_webpacker_yml.write(YAML.dump(Rails.env => ::Webpacker::Instance.new.config.send(:defaults).to_hash))
+      tmp_webpacker_yml.write(YAML.dump(Rails.env => Webpacker::Instance.new.config.send(:defaults).to_hash))
       tmp_webpacker_yml.flush
 
       # def initialize(root_path: Rails.root, config_path: Rails.root.join("config/webpacker.yml"))
-      Webpacker.instance = ::Webpacker::Instance.new(config_path: Pathname.new(tmp_webpacker_yml.path))
+      Webpacker.instance = Webpacker::Instance.new(config_path: Pathname.new(tmp_webpacker_yml.path))
     end
   end
 end

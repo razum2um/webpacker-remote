@@ -10,8 +10,6 @@ class Webpacker::Remote < Webpacker::Instance
   require 'webpacker/remote/configuration'
   require 'webpacker/remote/helper'
 
-  VERSION = '0.1.0'
-
   class Error < StandardError; end
 
   # rubocop:disable Lint/MissingSuper

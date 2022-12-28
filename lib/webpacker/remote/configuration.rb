@@ -26,11 +26,17 @@ class Webpacker::Remote::Configuration < Webpacker::Configuration
 
   # shakapacker error message
   def manifest_path
-    File.join(root_path.to_s, config_path.to_s)
+    public_manifest_path
   end
 
   # webpacker error message
   def public_manifest_path
-    manifest_path
+    public_remote_manifest_path
+  end
+
+  private
+
+  def public_remote_manifest_path
+    File.join(root_path.to_s, config_path.to_s)
   end
 end
