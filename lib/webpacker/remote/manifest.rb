@@ -17,13 +17,11 @@ class Webpacker::Remote::Manifest < Webpacker::Manifest
     end
   end
 
-  def public_manifest_content
-    JSON.parse(Net::HTTP.get_response(public_manifest_content_uri).body)
-  rescue JSON::ParserError, Errno::ECONNREFUSED, Net::OpenTimeout, Net::ReadTimeout, Errno::ENOENT => e
-    raise Webpacker::Remote::Error, <<~MSG
-      having {root_path: #{config.root_path.inspect}, config_path: #{config.config_path.inspect}}
-      #{e.class}: #{e.message}
-    MSG
+  # be more failsafe than railsy webpacker since we do networking
+  def refresh
+    @data = load
+  rescue Webpacker::Remote::Error
+    @data
   end
 
   def lookup_pack_with_chunks(name, pack_type = {})
@@ -62,6 +60,15 @@ class Webpacker::Remote::Manifest < Webpacker::Manifest
   end
 
   private
+
+  def public_manifest_content
+    JSON.parse(Net::HTTP.get_response(public_manifest_content_uri).body)
+  rescue JSON::ParserError, Errno::ECONNREFUSED, Net::OpenTimeout, Net::ReadTimeout, Errno::ENOENT => e
+    raise Webpacker::Remote::Error, <<~MSG
+      having {root_path: #{config.root_path.inspect}, config_path: #{config.config_path.inspect}}
+      #{e.class}: #{e.message}
+    MSG
+  end
 
   def public_manifest_content_uri
     URI.parse(File.join(config.root_path.to_s, config.config_path.to_s))

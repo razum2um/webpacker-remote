@@ -15,6 +15,24 @@ RSpec.describe Webpacker::Remote do
     end
   end
 
+  def stub_network_once_then_fail
+    @responses = [OpenStruct.new(body: File.read(File.expand_path(manifest, __dir__)))]
+    allow(Net::HTTP).to receive(:get_response).twice.with(URI.parse(root_path)) do
+      @responses.shift || raise(Errno::ECONNREFUSED)
+    end
+  end
+
+  shared_examples 'a manifest over unstable network' do
+    before { stub_network_once_then_fail }
+
+    describe '#manifest' do
+      it 'can #refresh with network failures' do
+        expect(subject.manifest.lookup('main', type: :javascript)).to eq MAIN_CHUNK
+        expect(subject.manifest.refresh).to be_present
+      end
+    end
+  end
+
   shared_examples 'a valid manifest' do
     before { stub_network }
 
@@ -39,11 +57,13 @@ RSpec.describe Webpacker::Remote do
 
   describe 'with manifest v3' do
     it_behaves_like 'a valid manifest'
+    it_behaves_like 'a manifest over unstable network'
   end
 
   describe 'with manifest v5' do
     let(:manifest) { '../webpack_assets_manifest_5.json' }
-    it_behaves_like 'a valid manifest', expected_netword_requests: 2
+    it_behaves_like 'a valid manifest'
+    # it_behaves_like 'a manifest over unstable network'
   end
 
   describe 'when config is cache_manifest: false' do
@@ -53,6 +73,16 @@ RSpec.describe Webpacker::Remote do
     it 'can #lookup assets N times doing N requests' do
       expect(Net::HTTP).to receive(:get_response).exactly(request_count).times.with(URI.parse(root_path)) do
         OpenStruct.new(body: File.read(File.expand_path(manifest, __dir__)))
+      end
+      request_count.times do
+        expect(subject.manifest.lookup('main', type: :javascript)).to eq MAIN_CHUNK
+      end
+    end
+
+    it 'can #lookup assets N times doing at least one ok requests' do
+      @responses = [OpenStruct.new(body: File.read(File.expand_path(manifest, __dir__)))]
+      expect(Net::HTTP).to receive(:get_response).exactly(request_count).times.with(URI.parse(root_path)) do
+        @responses.shift || raise(Errno::ECONNREFUSED)
       end
       request_count.times do
         expect(subject.manifest.lookup('main', type: :javascript)).to eq MAIN_CHUNK
