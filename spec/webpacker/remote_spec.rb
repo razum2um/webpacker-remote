@@ -63,7 +63,7 @@ RSpec.describe Webpacker::Remote do
   describe 'with manifest v5' do
     let(:manifest) { '../webpack_assets_manifest_5.json' }
     it_behaves_like 'a valid manifest'
-    # it_behaves_like 'a manifest over unstable network'
+    it_behaves_like 'a manifest over unstable network'
   end
 
   describe 'when config is cache_manifest: false' do
